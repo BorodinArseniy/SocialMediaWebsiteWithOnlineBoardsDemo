@@ -1,62 +1,105 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
-import InfiniteBoard from '../components/InfiniteBoard' // Новый компонент
-// Удаляем старые импорты:
-// import ContentBlock from '../components/ContentBlock'
-// import AddItemModal from '../components/AddItemModal'
+import InfiniteBoard from '../components/InfiniteBoard'
 
-export default function BoardPage(){
+export default function BoardPage() {
     const { boardId } = useParams()
     const [board, setBoard] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
     useEffect(() => {
-        const fetchBoard = async () => {
-            try {
-                const response = await axios.get(`/api/boards/${boardId}`)
-                setBoard(response.data)
-            } catch (error) {
-                console.error('Ошибка загрузки доски:', error)
-            } finally {
-                setLoading(false)
-            }
-        }
-
         fetchBoard()
     }, [boardId])
 
+    const fetchBoard = async () => {
+        try {
+            const { data } = await axios.get(`/api/boards/${boardId}`)
+            setBoard(data)
+            setError(null)
+
+            // Сохраняем данные доски в window для доступа из InfiniteBoard
+            window.boardTitle = data.title
+            window.boardIsPrivate = data.isPrivate
+            window.boardOwner = data.owner?.username
+
+        } catch (err) {
+            console.error('Error loading board:', err)
+            if (err.response?.status === 403) {
+                setError('У вас нет доступа к этой доске')
+            } else if (err.response?.status === 404) {
+                setError('Доска не найдена')
+            } else {
+                setError('Ошибка загрузки доски')
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-screen">
-                <div className="text-xl">Загрузка доски...</div>
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f9fafb'
+            }}>
+                <div style={{ fontSize: '20px', color: '#6b7280' }}>
+                    Загрузка доски...
+                </div>
             </div>
         )
     }
 
-    if (!board) {
+    if (error) {
         return (
-            <div className="flex items-center justify-center h-screen">
-                <div className="text-xl text-red-600">Доска не найдена</div>
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f9fafb'
+            }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{
+                        fontSize: '20px',
+                        color: '#dc2626',
+                        marginBottom: '16px'
+                    }}>
+                        {error}
+                    </div>
+                    <button
+                        onClick={() => window.location.href = '/discover'}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#3b82f6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '16px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Вернуться к доскам
+                    </button>
+                </div>
             </div>
         )
     }
 
-    return (
-        <div className="h-screen w-full">
-            {/* Заголовок доски */}
-            <div className="absolute top-4 right-4 z-10 bg-white p-3 rounded-lg shadow-lg">
-                <div className="text-sm text-gray-500">
-                    {board.isPrivate ? '🔒 Приватная' : '🌐 Публичная'}
-                </div>
-                <h1 className="text-lg font-bold">{board.title}</h1>
-                <div className="text-sm text-gray-600">
-                    by {board.owner?.username || 'неизвестно'}
-                </div>
-            </div>
+    if (!board) return null
 
-            {/* Бесконечная доска */}
-            <InfiniteBoard boardId={boardId} />
-        </div>
-    )
+    // Рендерим InfiniteBoard на весь экран без сайдбара
+    return <InfiniteBoard boardId={boardId} />
 }

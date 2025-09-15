@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AuthProvider, { useAuth } from './context/AuthContext'
 import Sidebar from './components/Sidebar'
 import LoginPage from './pages/LoginPage'
@@ -9,9 +9,14 @@ import MyBoardsPage from './pages/MyBoardsPage'
 import FollowingPage from './pages/FollowingPage'
 import BoardPage from './pages/BoardPage'
 import ProfilePage from './pages/ProfilePage'
+import './excalidraw-overrides.css' // Импортируем стили для Excalidraw
 
 function Shell(){
     const { token, loading } = useAuth()
+    const location = useLocation()
+
+    // Проверяем, находимся ли мы на странице доски
+    const isBoardPage = location.pathname.startsWith('/board/')
 
     if (loading) {
         return (
@@ -33,15 +38,19 @@ function Shell(){
 
     return (
         <>
-            <Sidebar/>
-            <Routes>
-                <Route path="/discover" element={<DiscoverPage/>} />
-                <Route path="/my" element={<MyBoardsPage/>} />
-                <Route path="/following" element={<FollowingPage/>} />
-                <Route path="/board/:boardId" element={<BoardPage/>} />
-                <Route path="/profile" element={<ProfilePage/>} />
-                <Route path="*" element={<Navigate to="/discover" />} />
-            </Routes>
+            {/* Показываем Sidebar только если это не страница доски */}
+            {!isBoardPage && <Sidebar/>}
+
+            <div className={isBoardPage ? '' : 'ml-60'}>
+                <Routes>
+                    <Route path="/discover" element={<DiscoverPage/>} />
+                    <Route path="/my" element={<MyBoardsPage/>} />
+                    <Route path="/following" element={<FollowingPage/>} />
+                    <Route path="/board/:boardId" element={<BoardPage/>} />
+                    <Route path="/profile" element={<ProfilePage/>} />
+                    <Route path="*" element={<Navigate to="/discover" />} />
+                </Routes>
+            </div>
         </>
     )
 }

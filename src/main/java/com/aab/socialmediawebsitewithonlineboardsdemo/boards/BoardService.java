@@ -49,6 +49,11 @@ public class BoardService {
         return boards.findPublicWithOwner();
     }
 
+    public List<Board> getUserBoards(Long userId) {
+        User user = users.requireById(userId);
+        return boards.findByOwner(user);
+    }
+
     @Transactional
     public BoardItem addItem(Long boardId, Long requesterId, BoardItem.Type type, String text, String url) {
         Board b = getPublicOrOwned(boardId, requesterId);

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity @Table(name = "board_items")
 public class BoardItem {
-    public enum Type { TEXT, IMAGE, LINK, QUOTE, GOAL, VIDEO, MUSIC }
+    public enum Type { TEXT, IMAGE, FILE, LINK, VIDEO, AUDIO }
 
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

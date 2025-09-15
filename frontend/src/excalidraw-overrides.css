@@ -1,0 +1,52 @@
+/* frontend/src/excalidraw-overrides.css */
+/* Добавьте этот файл и импортируйте его в main.jsx */
+
+/* Фиксим масштаб и размеры элементов Excalidraw */
+.excalidraw {
+    --default-font-size: 20px !important;
+    --default-font-family: 1 !important;
+}
+
+.excalidraw .App-menu {
+    transform: scale(1) !important;
+}
+
+.excalidraw .Island {
+    transform: scale(1) !important;
+}
+
+/* Убираем лишние отступы */
+.excalidraw-container {
+    position: fixed !important;
+    inset: 0 !important;
+    height: 100vh !important;
+    width: 100vw !important;
+}
+
+/* Фиксим z-index для наших панелей */
+.excalidraw .App-menu__left {
+    z-index: 5 !important;
+}
+
+.excalidraw .App-menu__right {
+    z-index: 5 !important;
+}
+
+/* Корректируем размер канваса */
+.excalidraw canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Фиксим проблемы с курсором */
+.excalidraw {
+    cursor: default !important;
+}
+
+.excalidraw[data-tool="hand"] {
+    cursor: grab !important;
+}
+
+.excalidraw[data-tool="hand"]:active {
+    cursor: grabbing !important;
+}
