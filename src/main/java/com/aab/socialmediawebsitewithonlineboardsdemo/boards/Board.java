@@ -7,26 +7,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Entity @Table(name = "boards")
+@Entity
+@Table(name = "boards")
 public class Board {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
 
     @Column(nullable = false)
     private String title;
 
-
     private boolean isPrivate = false;
 
-
+    @Column(name = "created_at")
     private Instant createdAt = Instant.now();
-    private Instant updatedAt = Instant.now();
 
+    @Column(name = "updated_at")
+    private Instant updatedAt = Instant.now();
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardItem> items = new ArrayList<>();

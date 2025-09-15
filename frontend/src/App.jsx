@@ -10,14 +10,27 @@ import FollowingPage from './pages/FollowingPage'
 import BoardPage from './pages/BoardPage'
 import ProfilePage from './pages/ProfilePage'
 
-
 function Shell(){
-    const { token } = useAuth()
-    if (!token) return <Routes>
-        <Route path="/login" element={<LoginPage/>} />
-        <Route path="/register" element={<RegisterPage/>} />
-        <Route path="*" element={<Navigate to="/login" />} />
-    </Routes>
+    const { token, loading } = useAuth()
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div>Loading...</div>
+            </div>
+        )
+    }
+
+    if (!token) {
+        return (
+            <Routes>
+                <Route path="/login" element={<LoginPage/>} />
+                <Route path="/register" element={<RegisterPage/>} />
+                <Route path="*" element={<Navigate to="/login" />} />
+            </Routes>
+        )
+    }
+
     return (
         <>
             <Sidebar/>
@@ -32,7 +45,6 @@ function Shell(){
         </>
     )
 }
-
 
 export default function App(){
     return (

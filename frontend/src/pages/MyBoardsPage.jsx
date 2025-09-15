@@ -7,7 +7,9 @@ import AddBoardModal from '../components/AddBoardModal'
 export default function MyBoardsPage(){
     const [boards, setBoards] = useState([])
     const [open, setOpen] = useState(false)
-    useEffect(()=>{ axios.get('/api/boards/discover').then(r=>setBoards(r.data)) }, []) // placeholder: replace with /api/users/me/boards after you add it
+    useEffect(() => {
+        axios.get('/api/users/me/boards').then(r => setBoards(r.data))
+    }, [])
     return (
         <div className="ml-60 p-6">
             <div className="flex items-center justify-between mb-4">

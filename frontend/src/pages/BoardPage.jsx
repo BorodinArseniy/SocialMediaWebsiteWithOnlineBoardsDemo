@@ -1,29 +1,62 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
-import ContentBlock from '../components/ContentBlock'
-import AddItemModal from '../components/AddItemModal'
-
+import InfiniteBoard from '../components/InfiniteBoard' // Новый компонент
+// Удаляем старые импорты:
+// import ContentBlock from '../components/ContentBlock'
+// import AddItemModal from '../components/AddItemModal'
 
 export default function BoardPage(){
     const { boardId } = useParams()
     const [board, setBoard] = useState(null)
-    const [open, setOpen] = useState(false)
-    useEffect(()=>{ axios.get(`/api/boards/${boardId}`).then(r=>setBoard(r.data)) }, [boardId])
-    if (!board) return <div className="ml-60 p-6">Loading...</div>
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchBoard = async () => {
+            try {
+                const response = await axios.get(`/api/boards/${boardId}`)
+                setBoard(response.data)
+            } catch (error) {
+                console.error('Ошибка загрузки доски:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchBoard()
+    }, [boardId])
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="text-xl">Загрузка доски...</div>
+            </div>
+        )
+    }
+
+    if (!board) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="text-xl text-red-600">Доска не найдена</div>
+            </div>
+        )
+    }
+
     return (
-        <div className="ml-60 p-6">
-            <div className="flex items-center justify-between mb-4">
-                <div>
-                    <div className="text-sm text-gray-500">{board.isPrivate ? 'Private' : 'Public'}</div>
-                    <h1 className="text-2xl font-bold">{board.title}</h1>
+        <div className="h-screen w-full">
+            {/* Заголовок доски */}
+            <div className="absolute top-4 right-4 z-10 bg-white p-3 rounded-lg shadow-lg">
+                <div className="text-sm text-gray-500">
+                    {board.isPrivate ? '🔒 Приватная' : '🌐 Публичная'}
                 </div>
-                <button className="px-3 py-1 bg-blue-600 text-white rounded" onClick={()=>setOpen(true)}>Add Item</button>
+                <h1 className="text-lg font-bold">{board.title}</h1>
+                <div className="text-sm text-gray-600">
+                    by {board.owner?.username || 'неизвестно'}
+                </div>
             </div>
-            <div className="space-y-3">
-                {board.items?.map(it => <ContentBlock key={it.id} item={it} />)}
-            </div>
-            <AddItemModal open={open} onClose={()=>setOpen(false)} boardId={board.id} onCreated={it=>setBoard({...board, items:[it, ...(board.items||[])]})} />
+
+            {/* Бесконечная доска */}
+            <InfiniteBoard boardId={boardId} />
         </div>
     )
 }

@@ -53,10 +53,4 @@ public class UserController {
     ) {}
 
     public record ChangePasswordDto(@NotBlank String newPassword) {}
-
-    public record UserDto(String id, String username, String email) {
-        public static UserDto from(User u) {
-            return new UserDto(u.getId().toString(), u.getUsername(), u.getEmail());
-        }
-    }
 }

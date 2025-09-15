@@ -1,4 +1,4 @@
-/** package com.aab.socialmediawebsitewithonlineboardsdemo;
+package com.aab.socialmediawebsitewithonlineboardsdemo;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,4 +12,3 @@ public class SecurityBeans {
         return new BCryptPasswordEncoder(); // стандартный безопасный хэш
     }
 }
-**/

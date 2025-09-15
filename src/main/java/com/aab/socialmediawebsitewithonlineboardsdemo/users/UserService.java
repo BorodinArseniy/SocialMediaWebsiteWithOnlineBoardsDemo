@@ -1,25 +1,23 @@
 package com.aab.socialmediawebsitewithonlineboardsdemo.users;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 public class UserService {
 
     private final UserRepository users;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder encoder; // Inject instead of creating
 
-    public UserService(UserRepository users) {
+    public UserService(UserRepository users, PasswordEncoder encoder) {
         this.users = users;
+        this.encoder = encoder; // Use injected encoder
     }
 
-    /** Регистрация */
     @Transactional
     public User register(String username, String email, String rawPassword) {
-        if (email != null && users.existsByEmail(email)) {
+        if (email != null && !email.trim().isEmpty() && users.existsByEmail(email)) {
             throw new IllegalArgumentException("Email уже используется");
         }
         if (users.existsByUsername(username)) {
@@ -27,12 +25,11 @@ public class UserService {
         }
         User u = new User();
         u.setUsername(username);
-        u.setEmail(email);
+        u.setEmail(email != null && !email.trim().isEmpty() ? email : null); // Handle empty email
         u.setPasswordHash(encoder.encode(rawPassword));
         return users.save(u);
     }
 
-    /** === Методы, которых ждёт твой контроллер === */
     @Transactional(readOnly = true)
     public User getById(Long id) {
         return users.findById(id)
@@ -52,7 +49,6 @@ public class UserService {
         users.save(u);
     }
 
-    /** Вспомогательные (может пригодиться в других сервисах) */
     @Transactional(readOnly = true)
     public User requireById(Long id) { return getById(id); }
 
